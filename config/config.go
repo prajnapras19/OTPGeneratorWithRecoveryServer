@@ -28,4 +28,3 @@ func Get() Config {
 	envconfig.MustProcess("", &cfg)
 	return cfg
 }
-
