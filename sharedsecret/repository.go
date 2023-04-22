@@ -5,7 +5,7 @@ import (
 )
 
 type Repository interface {
-	Insert(sharedSecret []SharedSecret) error
+	Insert(sharedSecrets []SharedSecret) error
 	GetAndDelete(clientID string) ([]SharedSecret, error)
 }
 
@@ -19,12 +19,23 @@ func NewRepository(db *gorm.DB) Repository {
 	}
 }
 
-func (r *repository) Insert(sharedSecret []SharedSecret) error {
-	// TODO
-	return nil
+func (r *repository) Insert(sharedSecrets []SharedSecret) error {
+	return r.db.Create(&sharedSecrets).Error
 }
 
 func (r *repository) GetAndDelete(clientID string) ([]SharedSecret, error) {
-	// TODO
-	return nil, nil
+	var res []SharedSecret
+
+	err := r.db.Transaction(func(tx *gorm.DB) error {
+		err := tx.Where("client_id = ?", clientID).Find(&res).Error
+		if err != nil {
+			return err
+		}
+		return tx.Where("client_id = ?", clientID).Delete(&SharedSecret{}).Error
+	})
+
+	if err != nil {
+		return nil, err
+	}
+	return res, nil
 }
