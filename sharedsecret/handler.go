@@ -21,11 +21,29 @@ func NewHandler(sharedSecretRepository Repository) Handler {
 }
 
 func (h *handler) Insert(gc *gin.Context) {
-	// TODO
+	var req []SharedSecret
+
+	if err := gc.ShouldBind(&req); err != nil {
+		gc.Status(http.StatusBadRequest)
+		return
+	}
+
+	if err := h.sharedSecretRepository.Insert(req); err != nil {
+		gc.Status(http.StatusInternalServerError)
+		return
+	}
+
 	gc.Status(http.StatusNoContent)
 }
 
 func (h *handler) Get(gc *gin.Context) {
-	// TODO
-	gc.Status(http.StatusNoContent)
+	clientID := gc.Param("client_id")
+
+	res, err := h.sharedSecretRepository.GetAndDelete(clientID)
+	if err != nil {
+		gc.Status(http.StatusInternalServerError)
+		return
+	}
+
+	gc.JSON(http.StatusOK, res)
 }
