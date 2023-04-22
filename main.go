@@ -5,6 +5,7 @@ import (
 	"github.com/prajnapras19/otpgeneratorwithrecoveryserver/client/mysql"
 	"github.com/prajnapras19/otpgeneratorwithrecoveryserver/config"
 	"github.com/prajnapras19/otpgeneratorwithrecoveryserver/sharedsecret"
+	"net/http"
 )
 
 func main() {
@@ -26,6 +27,9 @@ func main() {
 	r := gin.Default()
 	r.POST("/insert", sharedSecretHandler.Insert)
 	r.GET("/get/:client_id", sharedSecretHandler.Get)
+	r.GET("/_healthcheck", func(gc *gin.Context) {
+		gc.String(http.StatusOK, "OK")
+	})
 
 	r.Run(":" + cfg.RESTPort)
 }
